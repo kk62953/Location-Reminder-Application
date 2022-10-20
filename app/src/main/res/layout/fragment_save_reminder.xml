@@ -70,6 +70,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/margin_normal"
+            android:contentDescription="@string/reminder_saved"
             android:fadeVisible="@{!viewModel.showLoading.booleanValue()}"
             android:src="@drawable/ic_save"
             app:fabSize="normal"

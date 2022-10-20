@@ -6,7 +6,6 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.udacity.project4.locationreminders.MainCoroutineRule
 import com.udacity.project4.locationreminders.data.FakeDataSource
-import com.udacity.project4.locationreminders.data.dto.ReminderDTO
 import com.udacity.project4.locationreminders.getOrAwaitValue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runBlockingTest
@@ -20,69 +19,71 @@ import org.junit.runner.RunWith
 import org.koin.core.context.stopKoin
 import org.robolectric.annotation.Config
 
-@RunWith(AndroidJUnit4::class)
 @Config(sdk = [Build.VERSION_CODES.P])
+@RunWith(AndroidJUnit4::class)
 @ExperimentalCoroutinesApi
 class RemindersListViewModelTest {
 
-    // Subject under test
+    // Testing  RemindersListViewModel and its live data objects
     private lateinit var remindersListViewModel: RemindersListViewModel
-
-    // Use a fake repository to be injected into the viewmodel
     private lateinit var fakeDataSource: FakeDataSource
 
     // Executes each task synchronously using Architecture Components.
+    // This rule ensures that the test results happen synchronously and in a repeatable order.
     @get:Rule
     var instantExecutorRule = InstantTaskExecutorRule()
 
-    @ExperimentalCoroutinesApi
     @get:Rule
-    var mainCoroutineRule = MainCoroutineRule()
+    val mainCoroutineRule = MainCoroutineRule()
 
     @Before
-    fun setupViewModel() = mainCoroutineRule.runBlockingTest {
-
+    fun setupViewModel() {
         stopKoin()
-
-        val reminder1 = ReminderDTO("Title1", "Description1", "Location1", 1.0, 1.0)
-        val reminder2 = ReminderDTO("Title2", "Description2", "Location2", 2.0, 2.0)
-        val reminder3 = ReminderDTO("Title3", "Description3", "Location1", 3.0, 3.0)
-
-        val reminders = mutableListOf<ReminderDTO>(reminder1, reminder2, reminder3)
-
-        fakeDataSource = FakeDataSource(reminders)
-
+        fakeDataSource = FakeDataSource()
         remindersListViewModel = RemindersListViewModel(
             ApplicationProvider.getApplicationContext(),
-            fakeDataSource)
-    }
-
-    @Test
-    fun shouldReturnError() = mainCoroutineRule.runBlockingTest {
-        // Make the fake data source return errors
-        fakeDataSource.setReturnError(true)
-        remindersListViewModel.loadReminders()
-
-        // Then an error message is shown
-        assertThat(remindersListViewModel.showSnackBar.getOrAwaitValue(), `is`("Test exception"))
+            fakeDataSource
+        )
 
     }
 
     @Test
-    fun check_loading() = mainCoroutineRule.runBlockingTest {
-        // Pause dispatcher so we can verify initial values
+    fun loadReminders_loading() = runBlockingTest {
+        // Pause dispatcher so you can verify initial values.
         mainCoroutineRule.pauseDispatcher()
 
-        // Load the reminder in the viewmodel
+        // Load the reminder in the viewmodel.
         remindersListViewModel.loadReminders()
 
-        // Then progress indicator is shown
+        // Then assert that the progress indicator is shown.
         assertThat(remindersListViewModel.showLoading.getOrAwaitValue(), `is`(true))
 
-        // Execute pending coroutines actions
+        // Execute pending coroutines actions.
         mainCoroutineRule.resumeDispatcher()
 
-        // Then progress indicator is hidden
+        // Then assert that the progress indicator is hidden.
         assertThat(remindersListViewModel.showLoading.getOrAwaitValue(), `is`(false))
+        assertThat(remindersListViewModel.showNoData.getOrAwaitValue(), `is`(true))
     }
+
+    @Test
+    fun loadRemindersWhenRemindersAreUnavailable_callErrorToDisplay() = runBlockingTest {
+        // Make the repository return errors.
+        fakeDataSource.setReturnsError(true)
+        remindersListViewModel.loadReminders()
+
+        // Then empty and error are true (which triggers an error message to be shown).
+        assertThat(
+            remindersListViewModel.showSnackBar.getOrAwaitValue(),
+            `is`("Reminders not found")
+        )
+    }
+
+    @Test
+    fun loadReminders_hasError_showsError() = runBlockingTest {
+        fakeDataSource.deleteAllReminders()
+        remindersListViewModel.loadReminders()
+        assertThat(remindersListViewModel.showNoData.getOrAwaitValue(), `is`(true))
+    }
+
 }

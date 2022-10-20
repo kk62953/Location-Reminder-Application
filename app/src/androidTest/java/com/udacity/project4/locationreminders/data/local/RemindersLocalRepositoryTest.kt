@@ -23,7 +23,7 @@ import org.junit.runner.RunWith
 //Medium Test to test the repository
 @MediumTest
 class RemindersLocalRepositoryTest {
-
+    //Testing implementation to the RemindersLocalRepository.kt
     private lateinit var remindersLocalRepository: RemindersLocalRepository
     private lateinit var database: RemindersDatabase
 
@@ -75,5 +75,4 @@ class RemindersLocalRepositoryTest {
         assertThat(result.data.latitude, `is`(37.7260880147898))
         assertThat(result.data.longitude, `is`(-122.08202809095384))
     }
-
 }
