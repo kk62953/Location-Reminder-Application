@@ -43,7 +43,6 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
     private lateinit var selectedMarker: Marker
     private val defaultLocation = LatLng(33.79818, -111.96582)
     private val REQUEST_LOCATION_PERMISSION = 1
-    private val DEFAULT_ZOOM = 5f
     private lateinit var lastKnownLocation: Location
 
     override fun onCreateView(
@@ -137,7 +136,8 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
 
 
     private fun setMapLongClick() {
-        map.setOnMapClickListener {
+        map.setOnMapLongClickListener {
+
             map.clear()
 
             //Create snippet to display additional text below title
@@ -147,7 +147,6 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
                 it.latitude,
                 it.longitude
             )
-
             //Set the title of the marker to “Dropped Pin” and set the marker’s snippet to the snippet
             selectedMarker = map.addMarker(
                 MarkerOptions()

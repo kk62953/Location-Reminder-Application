@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import com.udacity.project4.locationreminders.savereminder.SaveReminderFragment.Companion.ACTION_GEOFENCE_EVENT
 
 
 /**
@@ -16,11 +17,7 @@ import android.util.Log
  *
  */
 
-const val DEFAULT_RADIUS_IN_METRES = 300f
-const val ACTION_GEOFENCE_EVENT = "ACTION_GEOFENCE_EVENT"
-
 class GeofenceBroadcastReceiver : BroadcastReceiver() {
-
     override fun onReceive(context: Context, intent: Intent) {
 
         // method to receive the geofencing events at the background

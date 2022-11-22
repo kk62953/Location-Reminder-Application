@@ -17,7 +17,6 @@ import com.udacity.project4.locationreminders.data.ReminderDataSource
 import com.udacity.project4.locationreminders.data.local.LocalDB
 import com.udacity.project4.locationreminders.data.local.RemindersLocalRepository
 import com.udacity.project4.locationreminders.savereminder.SaveReminderViewModel
-import com.udacity.project4.util.DataBindingIdlingResource
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -44,8 +43,6 @@ class ReminderListFragmentTest : KoinTest {
     var instantExecutorRule = InstantTaskExecutorRule()
 
     private lateinit var application: Application
-    private lateinit var repository: ReminderDataSource
-    private val dataBindingIdlingResource = DataBindingIdlingResource()
 
     @Before
     fun initRepository() {
@@ -71,7 +68,6 @@ class ReminderListFragmentTest : KoinTest {
         startKoin {
             modules(listOf(myModule))
         }
-        // Get the real repository
         val repository: ReminderDataSource by inject()
 
 

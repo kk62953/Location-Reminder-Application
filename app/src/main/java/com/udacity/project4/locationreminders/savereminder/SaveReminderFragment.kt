@@ -41,15 +41,13 @@ class SaveReminderFragment : BaseFragment() {
     private lateinit var geofencingClient: GeofencingClient
     private lateinit var newReminder: ReminderDataItem
 
-    private var resultCode = 0
-
 
     companion object {
         private const val REQUEST_FOREGROUND_AND_BACKGROUND_PERMISSION_RESULT_CODE = 66
         private const val REQUEST_FOREGROUND_ONLY_PERMISSIONS_REQUEST_CODE = 67
         private const val REQUEST_TURN_DEVICE_LOCATION_ON = 68
         private const val TAG = "SaveReminderFragment"
-        private const val ACTION_GEOFENCE_EVENT =
+        internal const val ACTION_GEOFENCE_EVENT =
             "SaveReminderFragment.action.ACTION_GEOFENCE_EVENT"
         const val GEOFENCE_RADIUS_IN_METERS = 120f
 
@@ -165,7 +163,7 @@ class SaveReminderFragment : BaseFragment() {
     ) {
         Log.d(TAG, "onRequestPermissionResult")
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == resultCode && grantResults.size > 0 &&
+        if (requestCode == REQUEST_FOREGROUND_AND_BACKGROUND_PERMISSION_RESULT_CODE && grantResults.size > 0 &&
             grantResults[0] == PackageManager.PERMISSION_GRANTED
         ) {
             checkDeviceLocationSettingsAndStartGeofence()
@@ -188,7 +186,7 @@ class SaveReminderFragment : BaseFragment() {
         val builder = LocationSettingsRequest.Builder().addLocationRequest(locationRequest)
 
         //Get Client Setting
-        val settingsClient = LocationServices.getSettingsClient(appContext)
+        val settingsClient = LocationServices.getSettingsClient(requireActivity())
         //Check Location Setting
         val locationSettingsResponseTask =
             settingsClient.checkLocationSettings(builder.build())
@@ -198,12 +196,10 @@ class SaveReminderFragment : BaseFragment() {
         locationSettingsResponseTask.addOnFailureListener { exception ->
             if (exception is ResolvableApiException && resolve) {
                 try {
-                    activity?.let {
-                        exception.startResolutionForResult(
-                            it,
-                            REQUEST_TURN_DEVICE_LOCATION_ON
-                        )
-                    }
+                    startIntentSenderForResult(
+                        exception.resolution.intentSender, REQUEST_TURN_DEVICE_LOCATION_ON,
+                        null, 0, 0, 0, null
+                    )
                 } catch (sendEx: IntentSender.SendIntentException) {
                     Log.d(TAG, "Error getting location settings resolution: " + sendEx.message)
                 }
@@ -223,6 +219,7 @@ class SaveReminderFragment : BaseFragment() {
         // if so you will want to add the geofence.
         locationSettingsResponseTask.addOnCompleteListener {
             if (it.isSuccessful) {
+                Log.i("Successful", "$it")
                 addNewGeofence()
             }
         }

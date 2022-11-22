@@ -61,18 +61,64 @@ class RemindersLocalRepositoryTest {
             "Reminder description",
             "Reminder location",
             37.7260880147898,
-            -122.08202809095384)
+            -122.08202809095384
+        )
         remindersLocalRepository.saveReminder(reminder)
 
         // WHEN  - Reminder retrieved by ID
-        val result = remindersLocalRepository.getReminder(reminder.id)
+        val result = remindersLocalRepository.getReminder(reminder.id) as? Result.Success
+
+        assertThat(result is Result.Success, `is`(true))
+        result as Result.Success
 
         // THEN - Same reminder is returned
-        result as Result.Success
         assertThat(result.data.title, `is`("Reminder title"))
         assertThat(result.data.description, `is`("Reminder description"))
         assertThat(result.data.location, `is`("Reminder location"))
         assertThat(result.data.latitude, `is`(37.7260880147898))
         assertThat(result.data.longitude, `is`(-122.08202809095384))
+    }
+
+    @Test
+    fun deleteReminders_EmptyList() = runBlocking {
+        val reminder = ReminderDTO(
+            "Reminder title",
+            "Reminder description",
+            "Reminder location",
+            37.7260880147898,
+            -122.08202809095384
+        )
+
+        remindersLocalRepository.saveReminder(reminder)
+
+        remindersLocalRepository.deleteAllReminders()
+
+        val result = remindersLocalRepository.getReminders()
+
+        assertThat(result is Result.Success, `is`(true))
+        result as Result.Success
+
+        assertThat(result.data, `is`(emptyList()))
+    }
+
+    @Test
+    fun retrieveReminderById_ReturnError() = runBlocking {
+        val reminder = ReminderDTO(
+            "Reminder title",
+            "Reminder description",
+            "Reminder location",
+            37.7260880147898,
+            -122.08202809095384
+        )
+
+        remindersLocalRepository.saveReminder(reminder)
+
+        remindersLocalRepository.deleteAllReminders()
+
+        val result = remindersLocalRepository.getReminder(reminder.id)
+
+        assertThat(result is Result.Error, `is`(true))
+        result as Result.Error
+        assertThat(result.message, `is`("Reminder not found!"))
     }
 }
